@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur : valeur d'un obstacle supprimé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root {
+    --vert: #006946;
+    --vert-profond: #004D34;
+    --vert-pale: rgba(0,105,70,0.06);
+    --jaune: #FFF200;
+    --jaune-doux: #FFF8A1;
+    --creme: #FBF3EB;
+    --creme-fonce: #EDE5DA;
+    --blanc: #FFFFFF;
+    --text: #1A1A1A;
+    --text-muted: #8A7E72;
+    --rouge: #C0392B;
+    --rouge-pale: rgba(192,57,43,0.05);
+    --rouge-border: rgba(192,57,43,0.12);
+    --radius: 16px;
+    --gap: 8px;
+  }
+
+  .bento {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    max-width: 520px;
+    margin: 0 auto;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  /* Tiles */
+  .tile {
+    background: var(--blanc);
+    border-radius: var(--radius);
+    border: 1px solid var(--creme-fonce);
+    overflow: hidden;
+  }
+  .tile-pad { padding: 20px 22px; }
+
+  .tile--result {
+    background: var(--vert);
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .tile--result::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,242,0,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .tile--evite {
+    background: var(--vert-profond);
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tile--estimation {
+    background: var(--blanc);
+    border: 1px solid var(--rouge-border);
+  }
+
+  .tile--copy {
+    background: var(--creme);
+    border: 1px solid var(--creme-fonce);
+  }
+
+  /* Top bar: devise */
+  .top-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 0;
+  }
+  .devise-group {
+    display: inline-flex;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--creme-fonce);
+    background: var(--blanc);
+  }
+  .devise-btn {
+    padding: 6px 16px;
+    font: 500 0.78rem/1 'DM Sans', sans-serif;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .devise-btn[aria-pressed="true"] {
+    font-weight: 700;
+    color: var(--blanc);
+    background: var(--vert);
+  }
+
+  /* Section labels */
+  .section-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+  .section-tag--factuel { background: var(--vert-pale); color: var(--vert); }
+  .section-tag--estimation { background: var(--rouge-pale); color: var(--rouge); }
+
+  /* Slider field */
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .field-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .field-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    min-width: 90px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .field-value--vert { color: var(--vert); }
+  .field-value--rouge { color: var(--rouge); }
+  .field-aide {
+    margin: 6px 0 0;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* Range */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    background: var(--creme-fonce);
+    transition: background 0.1s;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 3px solid var(--blanc);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 3px solid var(--blanc);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+  }
+  .range--vert::-webkit-slider-thumb { background: var(--vert); }
+  .range--vert::-moz-range-thumb { background: var(--vert); }
+  .range--rouge::-webkit-slider-thumb { background: var(--rouge); }
+  .range--rouge::-moz-range-thumb { background: var(--rouge); }
+
+  /* Unit pills */
+  .pills { display: flex; gap: 5px; margin-bottom: 14px; flex-wrap: wrap; }
+  .pill {
+    padding: 5px 12px;
+    font: 500 0.73rem/1 'DM Sans', sans-serif;
+    color: var(--text-muted);
+    background: var(--creme);
+    border: 1px solid var(--creme-fonce);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pill--vert[aria-pressed="true"] {
+    font-weight: 700; color: var(--blanc);
+    background: var(--vert); border-color: var(--vert);
+  }
+  .pill--rouge[aria-pressed="true"] {
+    font-weight: 700; color: var(--blanc);
+    background: var(--rouge); border-color: var(--rouge);
+  }
+
+  /* Result tiles */
+  .res-chain {
+    font-size: 0.73rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+  .res-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    color: var(--jaune);
+    line-height: 1.15;
+  }
+  .res-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+  }
+
+  /* Copy */
+  .copy-phrase {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--text);
+    margin: 0 0 14px;
+    font-style: italic;
+    opacity: 0.85;
+  }
+  .copy-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+  .copy-btn {
+    padding: 9px 18px;
+    font: 600 0.8rem/1 'DM Sans', sans-serif;
+    color: var(--vert);
+    background: var(--blanc);
+    border: 1.5px solid var(--vert);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--vert-pale); }
+  .copy-btn--done { color: var(--blanc); background: var(--vert); }
+
+  /* Footer */
+  .bento-footer {
+    text-align: center;
+    padding: 8px 0 0;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .bento-footer a { color: var(--vert); text-decoration: none; font-weight: 600; }
+
+  /* Fade-in */
+  @keyframes tileIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tile, .top-bar { animation: tileIn 0.4s ease both; }
+  .tile:nth-child(2) { animation-delay: 0.05s; }
+  .tile:nth-child(3) { animation-delay: 0.1s; }
+  .tile:nth-child(4) { animation-delay: 0.15s; }
+  .tile:nth-child(5) { animation-delay: 0.2s; }
+</style>
+</head>
+<body style="background:var(--creme);padding:16px">
+<div class="bento">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="devise-group">
+      <button class="devise-btn" aria-pressed="true" data-devise="eur" onclick="setDevise('eur')">€ EUR</button>
+      <button class="devise-btn" aria-pressed="false" data-devise="cad" onclick="setDevise('cad')">$ CAD</button>
+    </div>
+  </div>
+
+  <!-- Tile: inputs factuels -->
+  <div class="tile tile-pad">
+    <span class="section-tag section-tag--factuel">Ce qui s'est passé</span>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Personnes bloquées</span>
+        <span class="field-value field-value--vert" id="v-pers">3 pers.</span>
+      </div>
+      <input type="range" class="range--vert" id="r-pers" min="1" max="20" step="1" value="3" oninput="update()">
+      <p class="field-aide">Devs, QA, PO... tous ceux qui attendaient.</p>
+    </div>
+
+    <div class="field">
+      <div class="pills" id="pills-duree"></div>
+      <div class="field-header">
+        <span class="field-label">Durée du blocage</span>
+        <span class="field-value field-value--vert" id="v-duree"></span>
+      </div>
+      <input type="range" class="range--vert" id="r-duree" min="0.5" max="8" step="0.5" value="4" oninput="update()">
+      <p class="field-aide">Du début du blocage jusqu'à ta résolution.</p>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Coût horaire moyen</span>
+        <span class="field-value field-value--vert" id="v-cout">65 €/h</span>
+      </div>
+      <input type="range" class="range--vert" id="r-cout" min="20" max="200" step="1" value="65" oninput="update()">
+      <p class="field-aide" id="aide-cout">Salaire brut × 1.4 ÷ 1 600. En doute ? 65 €/h.</p>
+    </div>
+  </div>
+
+  <!-- Tile: result blocage -->
+  <div class="tile tile--result tile-pad">
+    <div class="res-chain" id="chain-blocage"></div>
+    <div class="res-number" id="primary-blocage"></div>
+    <div class="res-label" id="secondary-blocage"></div>
+  </div>
+
+  <!-- Tile: estimation -->
+  <div class="tile tile--estimation tile-pad">
+    <span class="section-tag section-tag--estimation">Ce que ton intervention a évité</span>
+
+    <div class="pills" id="pills-evite"></div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Temps de blocage évité</span>
+        <span class="field-value field-value--rouge" id="v-evite"></span>
+      </div>
+      <input type="range" class="range--rouge" id="r-evite" min="1" max="7" step="1" value="2" oninput="update()">
+      <p class="field-aide" id="aide-evite"></p>
+    </div>
+  </div>
+
+  <!-- Tile: result évité -->
+  <div class="tile tile--evite tile-pad">
+    <div class="res-chain" id="chain-evite"></div>
+    <div class="res-number" id="primary-evite"></div>
+    <div class="res-label" id="secondary-evite"></div>
+  </div>
+
+  <!-- Tile: copy -->
+  <div class="tile tile--copy tile-pad">
+    <p class="copy-phrase" id="copy-phrase"></p>
+    <div class="copy-buttons">
+      <button class="copy-btn" id="btn-long" onclick="copyText('long')">Copie la phrase</button>
+      <button class="copy-btn" id="btn-court" onclick="copyText('court')">Version courte</button>
+    </div>
+  </div>
+
+  <div class="bento-footer">
+    Un outil <a href="https://collaborationsolved.com" target="_blank" rel="noopener noreferrer">Collaboration Solved</a>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var DEVISES = {
+    eur: { s: '\u20AC', defaut: 65, aide: 'Salaire brut \u00D7 1.4 \u00F7 1 600. En doute ? 65 \u20AC/h.' },
+    cad: { s: '$', defaut: 55, aide: 'Salaire brut \u00D7 1.3 \u00F7 1 800. En doute ? 55 $/h.' }
+  };
+
+  var UNITES = [
+    { id: 'min', label: 'min',     min: 1,   max: 60, step: 1,   toH: function(v){ return v / 60; } },
+    { id: 'h',   label: 'heures',  min: 0.5, max: 8,  step: 0.5, toH: function(v){ return v; } },
+    { id: 'j',   label: 'jours',   min: 0.5, max: 7,  step: 0.5, toH: function(v){ return v * 8; } },
+    { id: 'sem', label: 'sem.',    min: 1,   max: 4,  step: 1,   toH: function(v){ return v * 40; } },
+    { id: 'mois',label: 'mois',    min: 1,   max: 4,  step: 1,   toH: function(v){ return v * 160; } }
+  ];
+
+  var devise = 'eur', uniteDuree = 'h', uniteEvite = 'j';
+  var phraseLongue = '', phraseCourte = '';
+
+  function fmt(n) { return Math.round(n).toLocaleString('fr-FR'); }
+  function fmtH(h) {
+    if (h % 1 === 0) return h.toString();
+    return h.toFixed(1).replace('.', ',');
+  }
+  function fmtDuree(heures) {
+    if (heures < 1) return Math.round(heures * 60) + ' min';
+    if (heures < 8) return fmtH(heures) + 'h';
+    if (heures < 40) {
+      var j = Math.floor(heures / 8), r = heures % 8;
+      return r === 0 ? j + ' jour' + (j > 1 ? 's' : '') : j + 'j ' + fmtH(r) + 'h';
+    }
+    if (heures < 160) {
+      var s = Math.floor(heures / 40), jr = Math.floor((heures % 40) / 8);
+      return jr === 0 ? s + ' sem.' : s + ' sem. ' + jr + 'j';
+    }
+    var m = Math.floor(heures / 160), sr = Math.floor((heures % 160) / 40);
+    return sr === 0 ? m + ' mois' : m + ' mois ' + sr + ' sem.';
+  }
+
+  function track(el, color) {
+    var min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+    var pct = ((val - min) / (max - min)) * 100;
+    el.style.background = 'linear-gradient(to right, ' + color + ' ' + pct + '%, var(--creme-fonce) ' + pct + '%)';
+  }
+
+  function getDef(id) {
+    for (var i = 0; i < UNITES.length; i++) { if (UNITES[i].id === id) return UNITES[i]; }
+    return UNITES[1];
+  }
+
+  function buildPills(barId, current, cssClass, cb) {
+    var bar = document.getElementById(barId);
+    bar.innerHTML = '';
+    UNITES.forEach(function(u) {
+      var b = document.createElement('button');
+      b.className = 'pill ' + cssClass;
+      b.textContent = u.label;
+      b.setAttribute('aria-pressed', u.id === current ? 'true' : 'false');
+      b.addEventListener('click', function() { cb(u.id); });
+      bar.appendChild(b);
+    });
+  }
+
+  function configSlider(id, unitId) {
+    var d = getDef(unitId), el = document.getElementById(id);
+    el.min = d.min; el.max = d.max; el.step = d.step; el.value = d.min;
+  }
+
+  window.setUniteDuree = function(id) {
+    uniteDuree = id; configSlider('r-duree', id);
+    buildPills('pills-duree', uniteDuree, 'pill--vert', setUniteDuree); update();
+  };
+  window.setUniteEvite = function(id) {
+    uniteEvite = id; configSlider('r-evite', id);
+    buildPills('pills-evite', uniteEvite, 'pill--rouge', setUniteEvite); update();
+  };
+
+  window.setDevise = function(d) {
+    var ancien = DEVISES[devise].defaut, sl = document.getElementById('r-cout');
+    var actuel = parseInt(sl.value, 10);
+    devise = d;
+    if (actuel === ancien) sl.value = DEVISES[d].defaut;
+    document.querySelectorAll('.devise-btn').forEach(function(b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-devise') === d ? 'true' : 'false');
+    });
+    document.getElementById('aide-cout').textContent = DEVISES[d].aide;
+    update();
+  };
+
+  window.update = function() {
+    var pers = parseInt(document.getElementById('r-pers').value, 10);
+    var dureeVal = parseFloat(document.getElementById('r-duree').value);
+    var cout = parseInt(document.getElementById('r-cout').value, 10);
+    var eviteVal = parseFloat(document.getElementById('r-evite').value);
+
+    var s = DEVISES[devise].s;
+    var dD = getDef(uniteDuree), dE = getDef(uniteEvite);
+    var dureeH = dD.toH(dureeVal), deltaH = dE.toH(eviteVal);
+
+    var heures = pers * dureeH;
+    var coutBlocage = Math.round(heures * cout);
+    var coutEvite = Math.round(pers * deltaH * cout);
+
+    // Displays
+    document.getElementById('v-pers').textContent = pers + ' pers.';
+    document.getElementById('v-duree').textContent = fmtH(dureeVal) + ' ' + dD.label;
+    document.getElementById('v-cout').textContent = cout + ' ' + s + '/h';
+    document.getElementById('v-evite').textContent = fmtH(eviteVal) + ' ' + dE.label;
+
+    // Tracks
+    track(document.getElementById('r-pers'), 'var(--vert)');
+    track(document.getElementById('r-duree'), 'var(--vert)');
+    track(document.getElementById('r-cout'), 'var(--vert)');
+    track(document.getElementById('r-evite'), 'var(--rouge)');
+
+    // Result 1
+    document.getElementById('chain-blocage').textContent =
+      pers + ' pers. \u00D7 ' + fmtDuree(dureeH) + ' \u00D7 ' + cout + ' ' + s + '/h';
+    document.getElementById('primary-blocage').textContent = fmt(coutBlocage) + ' ' + s;
+    document.getElementById('secondary-blocage').textContent =
+      fmtH(heures) + 'h de capacit\u00E9 immobilis\u00E9e';
+
+    // Result 2
+    document.getElementById('chain-evite').textContent =
+      pers + ' pers. \u00D7 ' + fmtDuree(deltaH) + ' en plus \u00D7 ' + cout + ' ' + s + '/h';
+    document.getElementById('primary-evite').textContent = fmt(coutEvite) + ' ' + s;
+    document.getElementById('secondary-evite').textContent =
+      fmtDuree(deltaH) + ' de blocage suppl\u00E9mentaire \u00E9vit\u00E9es';
+
+    // Aide
+    document.getElementById('aide-evite').textContent =
+      'Sans toi, ' + pers + ' personne' + (pers > 1 ? 's' : '') + ' auraient attendu ' + fmtDuree(deltaH) + ' de plus.';
+
+    // Phrases
+    var pl = pers > 1;
+    phraseLongue =
+      'Obstacle r\u00E9solu cette semaine. ' +
+      pers + ' personne' + (pl ? 's' : '') + ' bloqu\u00E9e' + (pl ? 's' : '') + ' pendant ' + fmtDuree(dureeH) + '. ' +
+      'Co\u00FBt du blocage\u00A0: ' + fmt(coutBlocage) + ' ' + s + ' (' + fmtH(heures) + 'h de capacit\u00E9 immobilis\u00E9e). ' +
+      'Sans intervention, le blocage aurait dur\u00E9 ' + fmtDuree(deltaH) + ' de plus. Co\u00FBt \u00E9vit\u00E9 estim\u00E9\u00A0: ' + fmt(coutEvite) + ' ' + s + '.';
+
+    phraseCourte =
+      'D\u00E9blocage\u00A0: ' + fmt(coutBlocage) + ' ' + s + ' (blocage) + ' +
+      fmt(coutEvite) + ' ' + s + ' (\u00E9vit\u00E9).';
+
+    document.getElementById('copy-phrase').textContent = '\u00AB\u00A0' + phraseLongue + '\u00A0\u00BB';
+  };
+
+  window.copyText = function(type) {
+    var text = type === 'long' ? phraseLongue : phraseCourte;
+    var btn = document.getElementById(type === 'long' ? 'btn-long' : 'btn-court');
+    var orig = type === 'long' ? 'Copie la phrase' : 'Version courte';
+
+    function done() {
+      btn.textContent = 'Copi\u00E9 \u2713';
+      btn.classList.add('copy-btn--done');
+      setTimeout(function() { btn.textContent = orig; btn.classList.remove('copy-btn--done'); }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function() { fbCopy(text); done(); });
+    } else { fbCopy(text); done(); }
+  };
+
+  function fbCopy(t) {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+
+  buildPills('pills-duree', uniteDuree, 'pill--vert', setUniteDuree);
+  buildPills('pills-evite', uniteEvite, 'pill--rouge', setUniteEvite);
+  update();
+})();
+</script>
+</body>
+</html>
