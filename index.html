@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audit Impeccable — impediment-value-calculator</title>
+<title>Audit — impediment-value-calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,6 +15,7 @@
     --red-light: rgba(192,57,43,0.07);
     --orange: #E67E22;
     --orange-light: rgba(230,126,34,0.07);
+    --amber: #92400E;
     --bg: #F8F8F6;
     --card: #FFFFFF;
     --border: #E5E2DC;
@@ -22,170 +23,67 @@
     --muted: #6B6560;
     --radius: 14px;
   }
-  body {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding: 32px 16px 64px;
-    line-height: 1.5;
-  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 32px 16px 64px; line-height: 1.5; }
   .container { max-width: 720px; margin: 0 auto; }
 
   .header { margin-bottom: 40px; }
-  .header-meta {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--green);
-    margin-bottom: 10px;
-  }
-  .header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
-    line-height: 1.2;
-    margin-bottom: 8px;
-  }
+  .header-meta { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.2; margin-bottom: 8px; }
   .header-sub { font-size: 0.95rem; color: var(--muted); }
 
-  .score-banner {
-    background: var(--green);
-    color: #fff;
-    border-radius: var(--radius);
-    padding: 24px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-  }
+  .score-banner { background: var(--green); color: #fff; border-radius: var(--radius); padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 40px; flex-wrap: wrap; }
   .score-banner-left h2 { font-size: 0.85rem; font-weight: 500; opacity: 0.7; margin-bottom: 4px; }
-  .score-banner-left .score-num {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2.8rem;
-    color: var(--yellow);
-    line-height: 1;
-  }
+  .score-banner-left .score-num { font-family: 'DM Serif Display', serif; font-size: 2.8rem; color: var(--yellow); line-height: 1; }
   .score-banner-right { font-size: 0.85rem; opacity: 0.75; max-width: 300px; }
 
-  .section-title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
+  .section-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
 
   .rec-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
-  .rec-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px 24px;
-    position: relative;
-  }
+  .rec-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
   .rec-card--priority { border-left: 3px solid var(--red); }
   .rec-card--moderate { border-left: 3px solid var(--orange); }
   .rec-card--minor { border-left: 3px solid var(--muted); }
+  .rec-card--ux { border-left: 3px solid #6366F1; }
 
-  .rec-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
+  .rec-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
   .rec-title { font-size: 1rem; font-weight: 700; }
-  .rec-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+  .rec-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
   .badge--priority { background: var(--red-light); color: var(--red); }
   .badge--moderate { background: var(--orange-light); color: var(--orange); }
   .badge--minor { background: rgba(0,0,0,0.05); color: var(--muted); }
+  .badge--ux { background: rgba(99,102,241,0.08); color: #6366F1; }
 
   .rec-desc { font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; line-height: 1.55; }
-  .rec-finding {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 0.78rem;
-    font-family: 'DM Sans', monospace;
-    color: var(--text);
-    margin-bottom: 14px;
-  }
+  .rec-finding { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.78rem; color: var(--text); margin-bottom: 14px; }
   .rec-finding strong { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 4px; }
   .rec-fix { font-size: 0.85rem; line-height: 1.55; }
   .rec-fix strong { color: var(--green); }
 
   .swatch-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-  .swatch {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
+  .swatch { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; }
   .swatch-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
   .swatch--fail { color: var(--red); }
   .swatch--pass { color: var(--green); }
 
-  .issues-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  .issues-table th {
-    text-align: left;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    padding: 0 12px 10px;
-    font-weight: 600;
-  }
-  .issues-table td {
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
-    vertical-align: top;
-  }
-  .issues-table tr:hover td { background: var(--bg); }
-  .tag {
-    display: inline-block;
-    background: rgba(0,0,0,0.05);
-    border-radius: 4px;
-    padding: 2px 7px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    font-family: monospace;
-    color: var(--text);
-    white-space: nowrap;
-  }
-  .issues-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 4px 4px;
-    overflow: hidden;
-  }
+  /* Before/After */
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 18px; }
+  @media (max-width: 520px) { .ba-grid { grid-template-columns: 1fr; } }
+  .ba-panel { border-radius: 10px; padding: 14px; border: 1.5px solid var(--border); }
+  .ba-panel--before { background: rgba(192,57,43,0.025); border-color: rgba(192,57,43,0.18); }
+  .ba-panel--after  { background: rgba(0,105,70,0.025);  border-color: rgba(0,105,70,0.18); }
+  .ba-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
+  .ba-tag--before { background: rgba(192,57,43,0.1); color: #C0392B; }
+  .ba-tag--after  { background: rgba(0,105,70,0.1);  color: #006946; }
 
-  .footer {
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--muted);
-    padding-top: 24px;
-  }
+  /* All issues table */
+  .issues-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .issues-table th { text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 12px 10px; font-weight: 600; }
+  .issues-table td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: top; }
+  .issues-table tr:hover td { background: var(--bg); }
+  .tag { display: inline-block; background: rgba(0,0,0,0.05); border-radius: 4px; padding: 2px 7px; font-size: 0.7rem; font-weight: 600; font-family: monospace; color: var(--text); white-space: nowrap; }
+  .issues-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; overflow: hidden; }
+
+  .footer { text-align: center; font-size: 0.75rem; color: var(--muted); padding-top: 24px; }
   .footer a { color: var(--green); text-decoration: none; font-weight: 600; }
 </style>
 </head>
@@ -193,9 +91,9 @@
 <div class="container">
 
   <div class="header">
-    <p class="header-meta">Audit Impeccable · 19 juin 2026</p>
+    <p class="header-meta">Audit · 19 juin 2026</p>
     <h1>impediment-value-calculator</h1>
-    <p class="header-sub">Analyse statique via <strong>impeccable v3.0.3</strong> sur <code>index.html</code></p>
+    <p class="header-sub">Analyse <strong>impeccable v3.0.3</strong> + recommandations UI/UX sur <code>index.html</code></p>
   </div>
 
   <div class="score-banner">
@@ -203,12 +101,11 @@
       <h2>Anti-patterns détectés</h2>
       <div class="score-num">10</div>
     </div>
-    <div class="score-banner-right">
-      5 types distincts : contraste, taille de texte, majuscules, hiérarchie typographique, palette de couleurs. Toutes des <em>warnings</em> — aucun bloquant critique.
-    </div>
+    <div class="score-banner-right">5 types : contraste, taille de texte, majuscules, hiérarchie typo, palette. Toutes des <em>warnings</em> — aucun bloquant critique.</div>
   </div>
 
-  <p class="section-title">Recommandations prioritaires</p>
+  <!-- ====== IMPECCABLE SECTION ====== -->
+  <p class="section-title">Recommandations impeccable (analyse statique)</p>
   <div class="rec-list">
 
     <div class="rec-card rec-card--priority">
@@ -216,108 +113,235 @@
         <span class="rec-title">1. Contraste insuffisant sur les textes secondaires</span>
         <span class="rec-badge badge--priority">Accessibilité WCAG AA</span>
       </div>
-      <p class="rec-desc">
-        La couleur <code>--text-muted: #8a7e72</code> est utilisée sur fond blanc et fond crème pour les textes d'aide, le footer et les chaînes de calcul. Elle atteint 4.0:1 sur blanc et seulement 3.6:1 sur <code>#FBF3EB</code> — WCAG AA exige 4.5:1 pour le texte courant.
-      </p>
-      <div class="rec-finding">
-        <strong>Détectées (4 occurrences)</strong>
-        4.0:1 — #8a7e72 sur #ffffff &nbsp;|&nbsp; 3.6:1 — #8a7e72 sur #fbf3eb
+      <p class="rec-desc"><code>--text-muted: #8a7e72</code> atteint 4.0:1 sur blanc et 3.6:1 sur crème — WCAG AA exige 4.5:1. Affectés : textes d'aide, footer, chaînes de calcul (4 occurrences).</p>
+      <div class="swatch-row" style="margin-bottom:14px">
+        <div class="swatch swatch--fail"><div class="swatch-dot" style="background:#8a7e72;border:1px solid #ccc"></div>#8a7e72 · 4.0:1 ✗</div>
+        <div class="swatch swatch--pass"><div class="swatch-dot" style="background:#6B5F53;border:1px solid #ccc"></div>#6B5F53 · ~4.7:1 ✓</div>
       </div>
-      <div class="swatch-row">
-        <div class="swatch swatch--fail">
-          <div class="swatch-dot" style="background:#8a7e72;border:1px solid #ccc"></div>
-          #8a7e72 · 4.0:1 ✗
-        </div>
-        <div class="swatch swatch--pass">
-          <div class="swatch-dot" style="background:#6B5F53;border:1px solid #ccc"></div>
-          #6B5F53 · ~4.7:1 ✓
-        </div>
-      </div>
-      <div class="rec-fix" style="margin-top:14px">
-        <strong>Fix :</strong> Remplacer <code>--text-muted: #8a7e72</code> par <code>#6B5F53</code>. Une seule variable CSS à changer, impact global immédiat.
-      </div>
+      <div class="rec-fix"><strong>Fix :</strong> Remplacer <code>--text-muted: #8a7e72</code> par <code>#6B5F53</code>. Une variable CSS, impact global immédiat.</div>
     </div>
 
     <div class="rec-card rec-card--priority">
       <div class="rec-header">
-        <span class="rec-title">2. Texte trop petit — plusieurs éléments sous 12 px</span>
+        <span class="rec-title">2. Texte trop petit — 3 éléments sous 12 px</span>
         <span class="rec-badge badge--priority">Lisibilité</span>
       </div>
-      <p class="rec-desc">
-        Trois classes utilisent des tailles inférieures à 12 px : <code>.section-tag</code> (0.65rem = 10.4 px), <code>.bento-footer</code> (0.7rem = 11.2 px) et <code>.field-aide</code> (0.72rem = 11.52 px).
-      </p>
-      <div class="rec-finding">
-        <strong>Détectées (3 occurrences)</strong>
-        11.52px body text (×3) — classes : .section-tag, .bento-footer, .field-aide
-      </div>
-      <div class="rec-fix">
-        <strong>Fix :</strong> Relever les minima : <code>.section-tag</code> → <code>0.72rem</code>, <code>.bento-footer</code> → <code>0.75rem</code>, <code>.field-aide</code> → <code>0.8rem</code>.
-      </div>
+      <p class="rec-desc"><code>.section-tag</code> (10.4 px), <code>.bento-footer</code> (11.2 px), <code>.field-aide</code> (11.52 px). Illisible sur Retina ou pour un utilisateur avec une acuité réduite.</p>
+      <div class="rec-fix"><strong>Fix :</strong> <code>.section-tag</code> → <code>0.72rem</code>, <code>.bento-footer</code> → <code>0.75rem</code>, <code>.field-aide</code> → <code>0.8rem</code>.</div>
     </div>
 
     <div class="rec-card rec-card--moderate">
       <div class="rec-header">
-        <span class="rec-title">3. Hiérarchie typographique trop plate</span>
+        <span class="rec-title">3. Hiérarchie typographique plate</span>
         <span class="rec-badge badge--moderate">Lisibilité</span>
       </div>
-      <p class="rec-desc">
-        11 tailles de fonte distinctes entre 10.4 px et 19.2 px, avec un ratio de progression de seulement 1.08× entre la plupart des paliers.
-      </p>
-      <div class="rec-finding">
-        <strong>Détectée (1 occurrence)</strong>
-        Sizes: 10.4 · 11.2 · 11.5 · 11.7 · 12.5 · 12.8 · 13.4 · 13.6 · 14.1 · 16 · 19.2 px
-      </div>
-      <div class="rec-fix">
-        <strong>Fix :</strong> Consolider à 4–5 niveaux. Proposition : <code>12 · 14 · 16 · 20 · 32 px</code>.
-      </div>
+      <p class="rec-desc">11 tailles entre 10.4 et 19.2 px, ratio 1.08× entre paliers — l'œil ne perçoit pas de rupture claire.</p>
+      <div class="rec-fix"><strong>Fix :</strong> Consolider à 5 niveaux. Proposition : <code>12 · 14 · 16 · 20 · 32 px</code>.</div>
     </div>
 
     <div class="rec-card rec-card--moderate">
       <div class="rec-header">
-        <span class="rec-title">4. Majuscules sur des labels de 25+ caractères</span>
+        <span class="rec-title">4. Majuscules sur 31 caractères</span>
         <span class="rec-badge badge--moderate">Lisibilité</span>
       </div>
-      <p class="rec-desc">
-        <code>.section-tag</code> applique <code>text-transform: uppercase</code> à des phrases entières comme <em>"Ce que ton intervention a évité"</em> (31 chars). L'uppercase supprime les ascendantes/descendantes nécessaires à la reconnaissance des mots.
-      </p>
-      <div class="rec-finding">
-        <strong>Détectée (1 occurrence)</strong>
-        text-transform: uppercase sur 31 chars de body text
-      </div>
-      <div class="rec-fix">
-        <strong>Fix :</strong> Retirer <code>text-transform: uppercase</code> de <code>.section-tag</code>. Conserver <code>font-weight: 700</code> et <code>letter-spacing</code> — ils suffisent.
-      </div>
+      <p class="rec-desc"><code>.section-tag</code> applique <code>text-transform: uppercase</code> à des phrases entières. L'uppercase supprime les ascendantes/descendantes utiles à la reconnaissance des mots.</p>
+      <div class="rec-fix"><strong>Fix :</strong> Retirer <code>text-transform: uppercase</code>. <code>font-weight: 700</code> + <code>letter-spacing</code> suffisent.</div>
     </div>
 
     <div class="rec-card rec-card--minor">
       <div class="rec-header">
-        <span class="rec-title">5. Fond crème — palette "IA par défaut"</span>
+        <span class="rec-title">5. Fond crème — palette « IA par défaut »</span>
         <span class="rec-badge badge--minor">Design</span>
       </div>
-      <p class="rec-desc">
-        Le fond <code>#FBF3EB</code> (warm off-white) est flaggé comme le fond crème générique que les agents IA produisent par réflexe. La palette vert + crème + jaune a une identité forte — le fond mérite d'être un choix délibéré.
-      </p>
-      <div class="rec-finding">
-        <strong>Détectée (1 occurrence)</strong>
-        cream/beige page background rgb(251, 243, 235)
-      </div>
-      <div class="rec-fix">
-        <strong>Fix :</strong> Si c'est un choix de marque (Collaboration Solved), documenter la couleur dans la charte. Sinon, explorer <code>#F5F5F2</code> ou blanc cassé.
-      </div>
+      <p class="rec-desc"><code>#FBF3EB</code> (warm off-white) flaggé par impeccable comme réflexe IA. Si c'est un choix de marque Collaboration Solved, l'assumer ; sinon explorer <code>#F5F5F2</code>.</p>
+      <div class="rec-fix"><strong>Fix :</strong> Documenter la couleur comme choix délibéré dans la charte, ou remplacer par un fond neutre.</div>
     </div>
 
   </div>
 
+  <!-- ====== UI/UX SECTION ====== -->
+  <p class="section-title">Recommandations UI/UX visuelles</p>
+  <div class="rec-list">
+
+    <!-- UX REC 1: Color semantics -->
+    <div class="rec-card rec-card--ux">
+      <div class="rec-header">
+        <span class="rec-title">A. Sémantique des couleurs inversée</span>
+        <span class="rec-badge badge--ux">Perception</span>
+      </div>
+      <p class="rec-desc">
+        Les deux tuiles résultat sont vertes — y compris celle du <strong>coût du blocage</strong>, qui représente de l'argent perdu (une mauvaise nouvelle). Le vert signale universellement le positif ; l'utiliser pour un coût engage cognitif une dissonance. Par ailleurs, la section « estimation » (ce qui a été évité, donc la <em>bonne</em> nouvelle) est en rouge — le contraire de son message.
+      </p>
+      <div class="ba-grid">
+        <div class="ba-panel ba-panel--before">
+          <div class="ba-tag ba-tag--before">Avant ✗</div>
+          <div style="background:#006946; border-radius:10px; padding:14px 16px; margin-bottom:8px;">
+            <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:6px; letter-spacing:0.02em;">3 pers. × 4h × 65 €/h</div>
+            <div style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#FFF200; line-height:1.1;">780 €</div>
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:4px;">32h immobilisées</div>
+          </div>
+          <div style="background:#004D34; border-radius:10px; padding:14px 16px;">
+            <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:6px;">3 pers. × 2j × 65 €/h</div>
+            <div style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#FFF200; line-height:1.1;">3 120 €</div>
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:4px;">2j de blocage évitées</div>
+          </div>
+          <p style="font-size:0.72rem; color:#C0392B; margin-top:10px;">Coût perdu = vert ? Économie = vert foncé ? Les deux tuiles se confondent.</p>
+        </div>
+        <div class="ba-panel ba-panel--after">
+          <div class="ba-tag ba-tag--after">Après ✓</div>
+          <div style="background:#92400E; border-radius:10px; padding:14px 16px; margin-bottom:8px;">
+            <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:6px;">3 pers. × 4h × 65 €/h</div>
+            <div style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#FDE68A; line-height:1.1;">780 €</div>
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:4px;">32h immobilisées</div>
+          </div>
+          <div style="background:#006946; border-radius:10px; padding:14px 16px;">
+            <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:6px;">3 pers. × 2j × 65 €/h</div>
+            <div style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#FFF200; line-height:1.1;">3 120 €</div>
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:4px;">2j de blocage évitées</div>
+          </div>
+          <p style="font-size:0.72rem; color:#006946; margin-top:10px;">Ambre = coût engagé (neutre/négatif). Vert = économie réalisée (positif).</p>
+        </div>
+      </div>
+      <div class="rec-fix"><strong>Fix :</strong> Changer la tuile « coût du blocage » en ambre/rouille (<code>#92400E</code> ou <code>#B45309</code>). Garder le vert pour la tuile « coût évité ». Aligner la couleur des inputs d'estimation sur le vert plutôt que le rouge.</div>
+    </div>
+
+    <!-- UX REC 2: Result hierarchy -->
+    <div class="rec-card rec-card--ux">
+      <div class="rec-header">
+        <span class="rec-title">B. Hiérarchie dans les tuiles résultat</span>
+        <span class="rec-badge badge--ux">Lisibilité</span>
+      </div>
+      <p class="rec-desc">
+        La formule de calcul (<code>res-chain</code>) et le montant principal (<code>res-number</code>) ont des tailles trop proches. Au premier coup d’œil, le chiffre ne domine pas : l'utilisateur lit la formule avant de trouver le résultat. Le nombre devrait être le héros de la carte.
+      </p>
+      <div class="ba-grid">
+        <div class="ba-panel ba-panel--before">
+          <div class="ba-tag ba-tag--before">Avant ✗</div>
+          <div style="background:#006946; border-radius:10px; padding:18px 20px;">
+            <div style="font-size:0.73rem; color:rgba(255,255,255,0.45); margin-bottom:10px; letter-spacing:0.01em;">3 pers. × 4h × 65 €/h</div>
+            <div style="font-family:'DM Serif Display',serif; font-size:1.7rem; color:#FFF200; line-height:1.15;">780 €</div>
+            <div style="font-size:0.85rem; color:rgba(255,255,255,0.7); margin-top:6px;">32h de capacité immobilisée</div>
+          </div>
+          <p style="font-size:0.72rem; color:#C0392B; margin-top:10px;">Formule et montant à taille similaire — le chiffre ne saute pas aux yeux.</p>
+        </div>
+        <div class="ba-panel ba-panel--after">
+          <div class="ba-tag ba-tag--after">Après ✓</div>
+          <div style="background:#006946; border-radius:10px; padding:18px 20px;">
+            <div style="font-size:0.6rem; color:rgba(255,255,255,0.3); margin-bottom:12px; letter-spacing:0.04em;">3 pers. × 4h × 65 €/h</div>
+            <div style="font-family:'DM Serif Display',serif; font-size:2.8rem; color:#FFF200; line-height:1.0;">780 €</div>
+            <div style="font-size:0.8rem; color:rgba(255,255,255,0.65); margin-top:8px; font-weight:500;">32h de capacité immobilisée</div>
+          </div>
+          <p style="font-size:0.72rem; color:#006946; margin-top:10px;">Formule discrète, nombre dominant — impact immédiat à la lecture.</p>
+        </div>
+      </div>
+      <div class="rec-fix"><strong>Fix :</strong> <code>.res-chain</code> → <code>0.6rem</code> + opacité 30%. <code>.res-number</code> → <code>clamp(2rem, 7vw, 3rem)</code>. Une ligne CSS par propriété, aucun impact sur le layout.</div>
+    </div>
+
+    <!-- UX REC 3: Copy CTA -->
+    <div class="rec-card rec-card--ux">
+      <div class="rec-header">
+        <span class="rec-title">C. La tuile de copie est le CTA final — elle ne le montre pas</span>
+        <span class="rec-badge badge--ux">Parcours utilisateur</span>
+      </div>
+      <p class="rec-desc">
+        L'utilisateur remplit les sliders, obtient ses chiffres, et doit <em>copier la phrase pour la partager</em> — c’est le but de l’outil. Or la tuile de copie ressemble à une note de bas de page : fond crème, texte italique discret, boutons outline. L'action principale est traitée comme une action secondaire.
+      </p>
+      <div class="ba-grid">
+        <div class="ba-panel ba-panel--before">
+          <div class="ba-tag ba-tag--before">Avant ✗</div>
+          <div style="background:#FBF3EB; border:1px solid #EDE5DA; border-radius:12px; padding:18px 20px;">
+            <p style="font-size:0.84rem; line-height:1.55; color:#1A1A1A; font-style:italic; opacity:0.85; margin-bottom:14px;">« Obstacle résolu. 3 personnes bloquées pendant 4h. Coût : 780 €. Sans intervention, 3 120 € supplémentaires. »</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button style="padding:9px 18px; font:600 0.8rem/1 'DM Sans',sans-serif; color:#006946; background:#fff; border:1.5px solid #006946; border-radius:10px; cursor:default;">Copie la phrase</button>
+              <button style="padding:9px 18px; font:600 0.8rem/1 'DM Sans',sans-serif; color:#006946; background:#fff; border:1.5px solid #006946; border-radius:10px; cursor:default;">Version courte</button>
+            </div>
+          </div>
+          <p style="font-size:0.72rem; color:#C0392B; margin-top:10px;">Deux boutons identiques, fond neutre — rien ne signale que c'est le but de l'outil.</p>
+        </div>
+        <div class="ba-panel ba-panel--after">
+          <div class="ba-tag ba-tag--after">Après ✓</div>
+          <div style="background:#FBF3EB; border:1.5px solid #006946; border-radius:12px; padding:18px 20px;">
+            <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#006946; margin-bottom:10px;">Partage ton impact</p>
+            <p style="font-size:0.84rem; line-height:1.5; color:#1A1A1A; margin-bottom:16px; padding:10px 12px; background:rgba(0,105,70,0.06); border-left:3px solid #006946; border-radius:0 8px 8px 0;">« Obstacle résolu. 3 personnes bloquées pendant 4h. Coût : 780 €. Sans intervention, 3 120 € supplémentaires. »</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <button style="padding:12px 24px; font:700 0.88rem/1 'DM Sans',sans-serif; color:#fff; background:#006946; border:none; border-radius:10px; cursor:default;">Copier la phrase</button>
+              <button style="padding:12px 14px; font:500 0.82rem/1 'DM Sans',sans-serif; color:#6B6560; background:transparent; border:none; cursor:default; text-decoration:underline;">Version courte</button>
+            </div>
+          </div>
+          <p style="font-size:0.72rem; color:#006946; margin-top:10px;">Bordure verte + CTA primaire plein + secondaire discret — hiérarchie claire.</p>
+        </div>
+      </div>
+      <div class="rec-fix"><strong>Fix :</strong> Ajouter un titre « Partage ton impact », border vert sur la tile, <code>btn-long</code> en bouton primaire plein (<code>background: var(--vert)</code>), <code>btn-court</code> en lien texte. La phrase dans un bloc avec <code>border-left</code> vert pour la mettre en valeur.</div>
+    </div>
+
+    <!-- UX REC 4: Step numbering -->
+    <div class="rec-card rec-card--ux">
+      <div class="rec-header">
+        <span class="rec-title">D. Pas de fil conducteur — l’utilisateur ne sait pas qu’il y a 3 étapes</span>
+        <span class="rec-badge badge--ux">Onboarding</span>
+      </div>
+      <p class="rec-desc">
+        L’outil a un workflow linéaire : (1) saisir le blocage, (2) estimer l’intervention, (3) copier la phrase. Mais visuellement, les tuiles apparaissent comme une liste plate sans logique de progression. Un utilisateur pressant peut ne pas découvrir la section « évité », pourtant centrale.
+      </p>
+      <div class="ba-grid">
+        <div class="ba-panel ba-panel--before">
+          <div class="ba-tag ba-tag--before">Avant ✗</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="background:#fff; border:1px solid #EDE5DA; border-radius:10px; padding:12px 14px;">
+              <span style="display:inline-block; font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; padding:3px 8px; border-radius:5px; background:rgba(0,105,70,0.06); color:#006946;">Ce qui s’est passé</span>
+              <div style="font-size:0.78rem; color:#8a7e72; margin-top:8px;">Sliders …</div>
+            </div>
+            <div style="background:#fff; border:1px solid rgba(192,57,43,0.12); border-radius:10px; padding:12px 14px;">
+              <span style="display:inline-block; font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; padding:3px 8px; border-radius:5px; background:rgba(192,57,43,0.05); color:#C0392B;">Ce que ton intervention a évité</span>
+              <div style="font-size:0.78rem; color:#8a7e72; margin-top:8px;">Slider …</div>
+            </div>
+          </div>
+          <p style="font-size:0.72rem; color:#C0392B; margin-top:10px;">Aucune indication d'ordre ou de progression — les sections semblent indépendantes.</p>
+        </div>
+        <div class="ba-panel ba-panel--after">
+          <div class="ba-tag ba-tag--after">Après ✓</div>
+          <div style="display:flex; flex-direction:column;">
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+                <div style="width:26px; height:26px; border-radius:50%; background:#006946; color:#fff; font-size:0.72rem; font-weight:700; display:flex; align-items:center; justify-content:center;">1</div>
+                <div style="width:2px; flex:1; min-height:16px; background:#EDE5DA; margin:2px 0;"></div>
+              </div>
+              <div style="background:#fff; border:1px solid #EDE5DA; border-radius:10px; padding:10px 12px; flex:1; margin-bottom:6px;">
+                <div style="font-size:0.7rem; font-weight:700; color:#006946;">Ce qui s’est passé</div>
+                <div style="font-size:0.75rem; color:#8a7e72; margin-top:4px;">Personnes, durée, coût …</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+                <div style="width:26px; height:26px; border-radius:50%; background:#B45309; color:#fff; font-size:0.72rem; font-weight:700; display:flex; align-items:center; justify-content:center;">2</div>
+                <div style="width:2px; flex:1; min-height:16px; background:#EDE5DA; margin:2px 0;"></div>
+              </div>
+              <div style="background:#fff; border:1px solid rgba(180,83,9,0.2); border-radius:10px; padding:10px 12px; flex:1; margin-bottom:6px;">
+                <div style="font-size:0.7rem; font-weight:700; color:#B45309;">Ton intervention a évité</div>
+                <div style="font-size:0.75rem; color:#8a7e72; margin-top:4px;">Estimer le temps évité …</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <div style="width:26px; height:26px; border-radius:50%; background:#006946; color:#FFF200; font-size:0.75rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">&#10003;</div>
+              <div style="background:#006946; border-radius:10px; padding:10px 12px; flex:1;">
+                <div style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin-bottom:4px;">Partage ton impact</div>
+                <div style="font-family:'DM Serif Display',serif; font-size:1.1rem; color:#FFF200;">780 € + 3 120 €</div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:0.72rem; color:#006946; margin-top:10px;">Progression visible — l’utilisateur sait où il en est et ce qui l’attend.</p>
+        </div>
+      </div>
+      <div class="rec-fix"><strong>Fix :</strong> Ajouter un numéro d’étape (<code>1</code>, <code>2</code>) dans un badge circulaire à gauche de chaque <code>.section-tag</code>, reliés par une ligne verticale CSS. Pas de JS nécessaire — pure mise en forme.</div>
+    </div>
+
+  </div>
+
+  <!-- ====== ALL ISSUES TABLE ====== -->
   <p class="section-title">Tous les anti-patterns détectés (10)</p>
   <div class="issues-card">
     <table class="issues-table">
-      <thead>
-        <tr>
-          <th>Anti-pattern</th>
-          <th>Détail</th>
-          <th>Sévérité</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Anti-pattern</th><th>Détail</th><th>Sévérité</th></tr></thead>
       <tbody>
         <tr><td><span class="tag">low-contrast</span></td><td>4.0:1 — #8a7e72 sur #ffffff (×3)</td><td>warning</td></tr>
         <tr><td><span class="tag">low-contrast</span></td><td>3.6:1 — #8a7e72 sur #fbf3eb</td><td>warning</td></tr>
