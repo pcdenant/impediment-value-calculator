@@ -14,13 +14,19 @@
     --vert: #006946;
     --vert-profond: #004D34;
     --vert-pale: rgba(0,105,70,0.06);
+    --vert-border: rgba(0,105,70,0.15);
     --jaune: #FFF200;
     --jaune-doux: #FFF8A1;
+    --ambre: #B45309;
+    --ambre-profond: #92400E;
+    --ambre-pale: rgba(180,83,9,0.06);
+    --ambre-border: rgba(180,83,9,0.15);
     --creme: #FBF3EB;
     --creme-fonce: #EDE5DA;
+    --page-bg: #F5F5F2;
     --blanc: #FFFFFF;
     --text: #1A1A1A;
-    --text-muted: #8A7E72;
+    --text-muted: #6B5F53;
     --rouge: #C0392B;
     --rouge-pale: rgba(192,57,43,0.05);
     --rouge-border: rgba(192,57,43,0.12);
@@ -48,7 +54,7 @@
   .tile-pad { padding: 20px 22px; }
 
   .tile--result {
-    background: var(--vert);
+    background: var(--ambre-profond);
     border: none;
     position: relative;
     overflow: hidden;
@@ -65,7 +71,7 @@
   }
 
   .tile--evite {
-    background: var(--vert-profond);
+    background: var(--vert);
     border: none;
     position: relative;
     overflow: hidden;
@@ -73,12 +79,12 @@
 
   .tile--estimation {
     background: var(--blanc);
-    border: 1px solid var(--rouge-border);
+    border: 1px solid var(--vert-border);
   }
 
   .tile--copy {
     background: var(--creme);
-    border: 1px solid var(--creme-fonce);
+    border: 1.5px solid rgba(0,105,70,0.3);
   }
 
   /* Top bar: devise */
@@ -96,7 +102,7 @@
   }
   .devise-btn {
     padding: 6px 16px;
-    font: 500 0.78rem/1 'DM Sans', sans-serif;
+    font: 500 0.875rem/1 'DM Sans', sans-serif;
     color: var(--text-muted);
     background: transparent;
     border: none;
@@ -112,16 +118,36 @@
   /* Section labels */
   .section-tag {
     display: inline-block;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 4px 10px;
     border-radius: 6px;
     margin-bottom: 16px;
   }
   .section-tag--factuel { background: var(--vert-pale); color: var(--vert); }
-  .section-tag--estimation { background: var(--rouge-pale); color: var(--rouge); }
+  .section-tag--estimation { background: var(--vert-pale); color: var(--vert); }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .step-row .section-tag { margin-bottom: 0; }
+  .step-badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--vert);
+    color: var(--blanc);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
   /* Slider field */
   .field { margin-bottom: 18px; }
@@ -134,22 +160,22 @@
     gap: 8px;
   }
   .field-label {
-    font-size: 0.88rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text);
   }
   .field-value {
     font-family: 'DM Serif Display', serif;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     min-width: 90px;
     text-align: right;
     white-space: nowrap;
   }
   .field-value--vert { color: var(--vert); }
-  .field-value--rouge { color: var(--rouge); }
+  .field-value--rouge { color: var(--vert); }
   .field-aide {
     margin: 6px 0 0;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     line-height: 1.4;
   }
@@ -185,14 +211,14 @@
   }
   .range--vert::-webkit-slider-thumb { background: var(--vert); }
   .range--vert::-moz-range-thumb { background: var(--vert); }
-  .range--rouge::-webkit-slider-thumb { background: var(--rouge); }
-  .range--rouge::-moz-range-thumb { background: var(--rouge); }
+  .range--rouge::-webkit-slider-thumb { background: var(--vert); }
+  .range--rouge::-moz-range-thumb { background: var(--vert); }
 
   /* Unit pills */
   .pills { display: flex; gap: 5px; margin-bottom: 14px; flex-wrap: wrap; }
   .pill {
     padding: 5px 12px;
-    font: 500 0.73rem/1 'DM Sans', sans-serif;
+    font: 500 0.75rem/1 'DM Sans', sans-serif;
     color: var(--text-muted);
     background: var(--creme);
     border: 1px solid var(--creme-fonce);
@@ -206,43 +232,58 @@
   }
   .pill--rouge[aria-pressed="true"] {
     font-weight: 700; color: var(--blanc);
-    background: var(--rouge); border-color: var(--rouge);
+    background: var(--vert); border-color: var(--vert);
   }
 
   /* Result tiles */
   .res-chain {
-    font-size: 0.73rem;
+    font-size: 0.6rem;
     font-weight: 500;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.3);
     margin-bottom: 8px;
     letter-spacing: 0.02em;
   }
   .res-number {
     font-family: 'DM Serif Display', serif;
-    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-size: clamp(2rem, 7vw, 3rem);
     color: var(--jaune);
     line-height: 1.15;
   }
   .res-label {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 500;
     color: rgba(255,255,255,0.7);
     margin-top: 4px;
   }
 
   /* Copy */
+  .copy-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vert);
+    margin-bottom: 8px;
+  }
+  .copy-quote {
+    border-left: 3px solid var(--vert);
+    background: var(--vert-pale);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
   .copy-phrase {
-    font-size: 0.84rem;
+    font-size: 0.875rem;
     line-height: 1.55;
     color: var(--text);
-    margin: 0 0 14px;
+    margin: 0;
     font-style: italic;
     opacity: 0.85;
   }
-  .copy-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+  .copy-buttons { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .copy-btn {
     padding: 9px 18px;
-    font: 600 0.8rem/1 'DM Sans', sans-serif;
+    font: 600 0.875rem/1 'DM Sans', sans-serif;
     color: var(--vert);
     background: var(--blanc);
     border: 1.5px solid var(--vert);
@@ -252,12 +293,22 @@
   }
   .copy-btn:hover { background: var(--vert-pale); }
   .copy-btn--done { color: var(--blanc); background: var(--vert); }
+  .copy-btn--primary { color: var(--blanc); background: var(--vert); border-color: var(--vert); }
+  .copy-btn--primary:hover { background: var(--vert-profond); }
+  .copy-btn--text {
+    border-color: transparent;
+    background: transparent;
+    color: var(--text-muted);
+    text-decoration: underline;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
 
   /* Footer */
   .bento-footer {
     text-align: center;
     padding: 8px 0 0;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
   }
   .bento-footer a { color: var(--vert); text-decoration: none; font-weight: 600; }
@@ -274,7 +325,7 @@
   .tile:nth-child(5) { animation-delay: 0.2s; }
 </style>
 </head>
-<body style="background:var(--creme);padding:16px">
+<body style="background:var(--page-bg);padding:16px">
 <div class="bento">
 
   <!-- Top bar -->
@@ -287,7 +338,10 @@
 
   <!-- Tile: inputs factuels -->
   <div class="tile tile-pad">
-    <span class="section-tag section-tag--factuel">Ce qui s'est passé</span>
+    <div class="step-row">
+      <span class="step-badge">1</span>
+      <span class="section-tag section-tag--factuel">Ce qui s'est passé</span>
+    </div>
 
     <div class="field">
       <div class="field-header">
@@ -327,7 +381,10 @@
 
   <!-- Tile: estimation -->
   <div class="tile tile--estimation tile-pad">
-    <span class="section-tag section-tag--estimation">Ce que ton intervention a évité</span>
+    <div class="step-row">
+      <span class="step-badge">2</span>
+      <span class="section-tag section-tag--estimation">Ce que ton intervention a évité</span>
+    </div>
 
     <div class="pills" id="pills-evite"></div>
 
@@ -350,10 +407,13 @@
 
   <!-- Tile: copy -->
   <div class="tile tile--copy tile-pad">
-    <p class="copy-phrase" id="copy-phrase"></p>
+    <p class="copy-label">Partage ton impact</p>
+    <div class="copy-quote">
+      <p class="copy-phrase" id="copy-phrase"></p>
+    </div>
     <div class="copy-buttons">
-      <button class="copy-btn" id="btn-long" onclick="copyText('long')">Copie la phrase</button>
-      <button class="copy-btn" id="btn-court" onclick="copyText('court')">Version courte</button>
+      <button class="copy-btn copy-btn--primary" id="btn-long" onclick="copyText('long')">Copier la phrase</button>
+      <button class="copy-btn copy-btn--text" id="btn-court" onclick="copyText('court')">Version courte</button>
     </div>
   </div>
 
@@ -476,7 +536,7 @@
     track(document.getElementById('r-pers'), 'var(--vert)');
     track(document.getElementById('r-duree'), 'var(--vert)');
     track(document.getElementById('r-cout'), 'var(--vert)');
-    track(document.getElementById('r-evite'), 'var(--rouge)');
+    track(document.getElementById('r-evite'), 'var(--vert)');
 
     // Result 1
     document.getElementById('chain-blocage').textContent =
@@ -514,7 +574,7 @@
   window.copyText = function(type) {
     var text = type === 'long' ? phraseLongue : phraseCourte;
     var btn = document.getElementById(type === 'long' ? 'btn-long' : 'btn-court');
-    var orig = type === 'long' ? 'Copie la phrase' : 'Version courte';
+    var orig = type === 'long' ? 'Copier la phrase' : 'Version courte';
 
     function done() {
       btn.textContent = 'Copi\u00E9 \u2713';
