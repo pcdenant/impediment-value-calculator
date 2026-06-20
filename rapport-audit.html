@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport d'audit UI/UX — Calculateur d'obstacle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --page: #F4F3F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD8;
+    --text: #1A1A1A;
+    --muted: #6B6460;
+    --green: #006946;
+    --green-pale: rgba(0,105,70,0.08);
+    --green-border: rgba(0,105,70,0.2);
+    --amber: #B45309;
+    --amber-pale: rgba(180,83,9,0.08);
+    --amber-border: rgba(180,83,9,0.2);
+    --red: #C0392B;
+    --red-pale: rgba(192,57,43,0.08);
+    --red-border: rgba(192,57,43,0.2);
+    --blue: #1D4ED8;
+    --blue-pale: rgba(29,78,216,0.08);
+    --blue-border: rgba(29,78,216,0.2);
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--page);
+    color: var(--text);
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+
+  .report {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .report-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    margin-bottom: 24px;
+  }
+  .report-header h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .report-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .report-meta span { margin-right: 16px; }
+  .report-meta a { color: var(--green); }
+
+  /* Score bar */
+  .score-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .score-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .score-chip--error { background: var(--red-pale); color: var(--red); border: 1px solid var(--red-border); }
+  .score-chip--warning { background: var(--amber-pale); color: var(--amber); border: 1px solid var(--amber-border); }
+  .score-chip--info { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
+  .score-chip .count { font-size: 1.25rem; font-weight: 700; line-height: 1; }
+
+  /* Section */
+  .section {
+    margin-bottom: 32px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .section-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .section-tag--auto { background: var(--blue-pale); color: var(--blue); }
+  .section-tag--manuel { background: var(--amber-pale); color: var(--amber); }
+
+  /* Finding card */
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .finding-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .severity-badge {
+    flex-shrink: 0;
+    margin-top: 2px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .severity-badge--warning { background: var(--amber-pale); color: var(--amber); border: 1px solid var(--amber-border); }
+  .severity-badge--info { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
+  .severity-badge--error { background: var(--red-pale); color: var(--red); border: 1px solid var(--red-border); }
+  .severity-badge--medium { background: var(--amber-pale); color: var(--amber); border: 1px solid var(--amber-border); }
+  .severity-badge--low { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
+  .severity-badge--high { background: var(--red-pale); color: var(--red); border: 1px solid var(--red-border); }
+
+  .finding-title-block { flex: 1; }
+  .finding-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .finding-desc {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .finding-body {
+    padding: 16px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Code snippet */
+  .code-block {
+    background: #F8F7F5;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'DM Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: #2D2D2D;
+    overflow-x: auto;
+  }
+  .code-block .hl { color: var(--red); font-weight: 500; }
+  .code-block .hl-good { color: var(--green); font-weight: 500; }
+  .code-block .comment { color: var(--muted); }
+
+  /* Visual demo panels */
+  .demo-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .demo-panel {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .demo-panel-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 10px;
+  }
+  .demo-panel--before .demo-panel-label { background: var(--red-pale); color: var(--red); }
+  .demo-panel--after .demo-panel-label { background: var(--green-pale); color: var(--green); }
+  .demo-panel-content {
+    background: #fff;
+    padding: 14px;
+    font-size: 0.875rem;
+  }
+
+  /* Specific demo styles */
+  .demo-side-tab-bad {
+    border-left: 3px solid #006946;
+    background: rgba(0,105,70,0.06);
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: #1A1A1A;
+    opacity: 0.85;
+  }
+  .demo-side-tab-good {
+    background: rgba(0,105,70,0.06);
+    border: 1px solid rgba(0,105,70,0.2);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: #1A1A1A;
+    opacity: 0.85;
+  }
+  .demo-tracking-bad {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #006946;
+    background: rgba(0,105,70,0.08);
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .demo-tracking-good {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #006946;
+    background: rgba(0,105,70,0.08);
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  /* Manual finding demos */
+  .demo-tiny-label-bad {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #006946;
+    margin-bottom: 6px;
+  }
+  .demo-tiny-label-good {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #006946;
+    margin-bottom: 6px;
+  }
+  .demo-badge-bad {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #006946; color: #fff;
+    font-size: 0.7rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .demo-badge-good {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #006946; color: #fff;
+    font-size: 0.75rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .demo-badge-row { display: flex; align-items: center; gap: 8px; }
+
+  .demo-pale-bad {
+    background: rgba(0,105,70,0.06);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #006946;
+    display: inline-block;
+  }
+  .demo-pale-good {
+    background: rgba(0,105,70,0.12);
+    border: 1px solid rgba(0,105,70,0.25);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #006946;
+    display: inline-block;
+  }
+  .contrast-bar {
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+  }
+  .contrast-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  .demo-focus-bad button {
+    padding: 8px 14px;
+    background: #006946;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+  }
+  .demo-focus-bad button:focus { outline: none; }
+  .demo-focus-good button {
+    padding: 8px 14px;
+    background: #006946;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .demo-focus-good button:focus-visible {
+    outline: 3px solid #FFF200;
+    outline-offset: 3px;
+  }
+  .demo-focus-note { font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
+
+  .demo-semantic-bad {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .demo-pill-rouge {
+    padding: 4px 10px; border-radius: 20px;
+    background: #006946; color: #fff;
+    font-size: 0.75rem; font-weight: 600;
+  }
+  .demo-pill-rouge-label {
+    font-size: 0.75rem; color: var(--muted); font-style: italic;
+  }
+  .demo-pill-vert {
+    padding: 4px 10px; border-radius: 20px;
+    background: #006946; color: #fff;
+    font-size: 0.75rem; font-weight: 600;
+  }
+
+  /* Summary table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .summary-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: #F8F7F5;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .summary-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table tr:hover td { background: #FAFAF9; }
+
+  .effort-chip {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .effort-chip--xs { background: #DCFCE7; color: #166534; }
+  .effort-chip--s { background: #FEF9C3; color: #854D0E; }
+  .effort-chip--m { background: #FEE2E2; color: #991B1B; }
+
+  .impact-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  .impact-dot--high { background: var(--red); }
+  .impact-dot--medium { background: var(--amber); }
+  .impact-dot--low { background: var(--blue); }
+
+  @media (max-width: 540px) {
+    .demo-panels { grid-template-columns: 1fr; }
+    .report-header { padding: 24px 20px; }
+    .finding-body { padding: 14px 16px; }
+    .finding-head { padding: 14px 16px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="report">
+
+  <!-- ═══════════════════════════════════════════════════
+       HEADER
+  ════════════════════════════════════════════════════ -->
+  <div class="report-header">
+    <h1>Rapport d'audit UI/UX</h1>
+    <p class="report-meta">
+      <span>📅 20 juin 2026</span>
+      <span>🔧 impeccable v2.3.2</span>
+      <span>📄 <a href="index.html">index.html</a></span>
+    </p>
+    <div class="score-row">
+      <div class="score-chip score-chip--error">
+        <span class="count">0</span> erreur critique
+      </div>
+      <div class="score-chip score-chip--warning">
+        <span class="count">2</span> avertissements impeccable
+      </div>
+      <div class="score-chip score-chip--info">
+        <span class="count">5</span> observations manuelles
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION A — IMPECCABLE
+  ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Section A — Analyse automatique (impeccable)</h2>
+      <span class="section-tag section-tag--auto">Automatique</span>
+    </div>
+
+    <!-- Finding A1 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--warning">Warning</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Side-tab accent border</div>
+          <div class="finding-desc">La bordure gauche colorée de <code>.copy-quote</code> est l'un des patterns les plus reconnaissables des UI générées par IA. Elle signale "quelque chose d'important" mais par répétition devient un tic visuel.</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* Ligne détectée dans index.html */
+.copy-quote {
+  <span class="hl">border-left: 3px solid var(--vert);</span>  /* ← side-tab */
+  background: var(--vert-pale);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+}</div>
+        <div class="demo-panels">
+          <div class="demo-panel demo-panel--before">
+            <div class="demo-panel-label">Avant — cliché IA</div>
+            <div class="demo-panel-content">
+              <div class="demo-side-tab-bad">«&nbsp;Grâce à mon intervention, l'équipe a économisé 2 jours de blocage.&nbsp;»</div>
+            </div>
+          </div>
+          <div class="demo-panel demo-panel--after">
+            <div class="demo-panel-label">Après — bordure complète subtile</div>
+            <div class="demo-panel-content">
+              <div class="demo-side-tab-good">«&nbsp;Grâce à mon intervention, l'équipe a économisé 2 jours de blocage.&nbsp;»</div>
+            </div>
+          </div>
+        </div>
+        <div class="code-block"><span class="comment">/* Fix proposé : supprimer la bordure gauche seule, utiliser une bordure complète discrète */</span>
+.copy-quote {
+  <span class="hl-good">border: 1px solid rgba(0,105,70,0.25);</span>
+  background: rgba(0,105,70,0.06);
+  <span class="hl-good">border-radius: 8px;</span>  /* rayon uniforme */
+  padding: 10px 12px;
+  <span class="comment">/* supprimer border-left: 3px + border-radius: 0 8px 8px 0 */</span>
+}</div>
+      </div>
+    </div>
+
+    <!-- Finding A2 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--warning">Warning</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Wide letter-spacing sur texte courant</div>
+          <div class="finding-desc">Un <code>letter-spacing: 0.10em</code> est appliqué sur <code>.section-tag</code> — classe utilisée comme label de section lisible, pas comme un sigle monogramme. Au-delà de 0.05em, l'espacement fragmente les mots et ralentit la lecture.</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* Ligne détectée dans index.html */
+.section-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  <span class="hl">letter-spacing: 0.1em;</span>  /* ← wide-tracking sur body text */
+  padding: 4px 10px;
+  border-radius: 6px;
+}</div>
+        <div class="demo-panels">
+          <div class="demo-panel demo-panel--before">
+            <div class="demo-panel-label">Avant — tracking 0.10em</div>
+            <div class="demo-panel-content">
+              <span class="demo-tracking-bad">Ce qui s'est passé</span>
+            </div>
+          </div>
+          <div class="demo-panel demo-panel--after">
+            <div class="demo-panel-label">Après — tracking 0.05em</div>
+            <div class="demo-panel-content">
+              <span class="demo-tracking-good">Ce qui s'est passé</span>
+            </div>
+          </div>
+        </div>
+        <div class="code-block"><span class="comment">/* Fix : réduire l'espacement de moitié */</span>
+.section-tag {
+  <span class="hl-good">letter-spacing: 0.05em;</span>
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION B — CRITIQUE MANUELLE
+  ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Section B — Critique UI/UX manuelle</h2>
+      <span class="section-tag section-tag--manuel">Manuel</span>
+    </div>
+
+    <!-- Finding B1 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--medium">Medium</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Texte résiduel sous 12 px</div>
+          <div class="finding-desc"><code>.copy-label</code> (0.65rem ≈ 10.4 px) et <code>.step-badge</code> (0.7rem ≈ 11.2 px) sont en dessous du seuil WCAG de lisibilité minimale (12 px). Ces éléments ont échappé à la passe typo précédente.</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* index.html — CSS actuel */
+.copy-label {
+  <span class="hl">font-size: 0.65rem;</span>   /* ≈ 10.4 px — sous le seuil */
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vert);
+}
+.step-badge {
+  <span class="hl">font-size: 0.7rem;</span>    /* ≈ 11.2 px — sous le seuil */
+  font-weight: 700;
+  /* ... */
+}</div>
+        <div class="demo-panels">
+          <div class="demo-panel demo-panel--before">
+            <div class="demo-panel-label">Avant — illisible</div>
+            <div class="demo-panel-content">
+              <div class="demo-tiny-label-bad">Partage ton impact</div>
+              <div class="demo-badge-row">
+                <span class="demo-badge-bad">1</span>
+                <span style="font-size:0.875rem;color:#6B6460">Ce qui s'est passé</span>
+              </div>
+            </div>
+          </div>
+          <div class="demo-panel demo-panel--after">
+            <div class="demo-panel-label">Après — 0.75rem minimum</div>
+            <div class="demo-panel-content">
+              <div class="demo-tiny-label-good">Partage ton impact</div>
+              <div class="demo-badge-row">
+                <span class="demo-badge-good">1</span>
+                <span style="font-size:0.875rem;color:#6B6460">Ce qui s'est passé</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-block"><span class="comment">/* Fix : aligner sur le niveau "méta" minimal */</span>
+.copy-label { <span class="hl-good">font-size: 0.75rem;</span> }
+.step-badge  { <span class="hl-good">font-size: 0.75rem;</span> }</div>
+      </div>
+    </div>
+
+    <!-- Finding B2 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--medium">Medium</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Classes CSS nommées <code>--rouge</code> qui rendent en vert</div>
+          <div class="finding-desc">Suite à la migration sémantique (finding 11), <code>.field-value--rouge</code> et <code>.pill--rouge</code> utilisent désormais <code>var(--vert)</code>. Le rendu est correct, mais le nom trahi l'intention et rend le CSS impossible à maintenir pour quelqu'un d'autre.</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* index.html — dette de nommage */
+.field-value--rouge { <span class="hl">color: var(--vert);</span> }  /* ← "rouge" = vert */
+
+.pill--rouge[aria-pressed="true"] {
+  <span class="hl">background: var(--vert);</span>       /* ← idem */
+  <span class="hl">border-color: var(--vert);</span>
+}</div>
+        <div class="demo-panels">
+          <div class="demo-panel demo-panel--before">
+            <div class="demo-panel-label">Avant — nom mensonger</div>
+            <div class="demo-panel-content">
+              <div class="demo-semantic-bad">
+                <span class="demo-pill-rouge" aria-pressed="true">3 heures</span>
+                <span class="demo-pill-rouge-label">← classe <code>.pill--rouge</code><br>rendu vert</span>
+              </div>
+            </div>
+          </div>
+          <div class="demo-panel demo-panel--after">
+            <div class="demo-panel-label">Après — nom cohérent</div>
+            <div class="demo-panel-content">
+              <div class="demo-semantic-bad">
+                <span class="demo-pill-vert" aria-pressed="true">3 heures</span>
+                <span class="demo-pill-rouge-label">← classe <code>.pill--vert</code><br>rendu vert ✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-block"><span class="comment">/* Fix : renommer les sélecteurs et les références HTML */</span>
+<span class="hl-good">.field-value--vert</span> { color: var(--vert); }
+
+<span class="hl-good">.pill--vert</span>[aria-pressed="true"] {
+  background: var(--vert);
+  border-color: var(--vert);
+}
+<span class="comment">/* + mettre à jour les pills.classList.add() dans le JS (ligne ~460) */</span></div>
+      </div>
+    </div>
+
+    <!-- Finding B3 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--low">Low</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Variables CSS orphelines — <code>--rouge-*</code> inutilisées</div>
+          <div class="finding-desc">Trois variables définies dans <code>:root</code> ne sont plus utilisées nulle part dans le CSS ou le JS après la migration couleur : <code>--rouge</code>, <code>--rouge-pale</code>, <code>--rouge-border</code>. Elles allourdissent la feuille de style et brouillent la palette officielle.</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* :root dans index.html — variables mortes */
+:root {
+  /* ... */
+  <span class="hl">--rouge: #C0392B;</span>                     /* ← 0 usage */
+  <span class="hl">--rouge-pale: rgba(192,57,43,0.05);</span>   /* ← 0 usage */
+  <span class="hl">--rouge-border: rgba(192,57,43,0.12);</span> /* ← 0 usage */
+}</div>
+        <div class="code-block"><span class="comment">/* Fix : supprimer les 3 lignes de :root
+   Vérifier d'abord : grep --rouge index.html
+   Résultat attendu : 0 occurrence hors :root */</span>
+:root {
+  <span class="hl-good">/* --rouge supprimé */</span>
+  <span class="hl-good">/* --rouge-pale supprimé */</span>
+  <span class="hl-good">/* --rouge-border supprimé */</span>
+}</div>
+      </div>
+    </div>
+
+    <!-- Finding B4 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--medium">Medium</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Fond <code>--vert-pale</code> trop transparent — badge de section invisible</div>
+          <div class="finding-desc"><code>--vert-pale: rgba(0,105,70,0.06)</code> produit un fond à 6 % d'opacité sur blanc : le contraste du fond lui-même est imperceptible. Les section-tags et la tile d'estimation utilisent cette valeur — leur affordance visuelle "zone verte" est perdue.</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* :root */
+--vert-pale: <span class="hl">rgba(0,105,70,0.06)</span>;  /* 6 % — quasi-invisible */
+
+/* Utilisateurs : */
+.section-tag--factuel   { background: var(--vert-pale); }
+.section-tag--estimation{ background: var(--vert-pale); }
+.tile--estimation       { background: var(--vert-pale); }</div>
+        <div class="demo-panels">
+          <div class="demo-panel demo-panel--before">
+            <div class="demo-panel-label">Avant — 6% opacité</div>
+            <div class="demo-panel-content">
+              <span class="demo-pale-bad">Ce qui s'est passé</span>
+              <div class="contrast-bar" style="background:linear-gradient(to right, rgba(0,105,70,0.06), white)"></div>
+              <div class="contrast-label">Fond à 6% sur blanc — indiscernable</div>
+            </div>
+          </div>
+          <div class="demo-panel demo-panel--after">
+            <div class="demo-panel-label">Après — 12% + bordure</div>
+            <div class="demo-panel-content">
+              <span class="demo-pale-good">Ce qui s'est passé</span>
+              <div class="contrast-bar" style="background:linear-gradient(to right, rgba(0,105,70,0.12), white)"></div>
+              <div class="contrast-label">Fond à 12% + bordure — zone identifiable</div>
+            </div>
+          </div>
+        </div>
+        <div class="code-block"><span class="comment">/* Fix : doubler l'opacité + ajouter une bordure sur les tags */</span>
+--vert-pale: <span class="hl-good">rgba(0,105,70,0.10)</span>;  /* 10–12% lisible */
+
+.section-tag--factuel,
+.section-tag--estimation {
+  <span class="hl-good">border: 1px solid var(--vert-border);</span>
+}</div>
+      </div>
+    </div>
+
+    <!-- Finding B5 -->
+    <div class="finding">
+      <div class="finding-head">
+        <span class="severity-badge severity-badge--high">High</span>
+        <div class="finding-title-block">
+          <div class="finding-title">Absence de styles <code>:focus-visible</code> — navigation clavier impossible</div>
+          <div class="finding-desc">Aucune règle <code>:focus-visible</code> n'est définie dans la feuille de style. Les utilisateurs clavier (Tab, Shift+Tab) ne voient aucun indicateur de focus sur les pills, boutons devise, sliders ou boutons copie. Violation directe de WCAG 2.4.7 (Focus Visible, niveau AA).</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="code-block">/* index.html — aucun focus défini */
+<span class="hl">/* grep ":focus" index.html → 0 résultat */</span>
+
+/* Éléments interactifs sans focus visible : */
+.pill          /* sélection de durée */
+.devise-btn    /* EUR / CAD */
+.copy-btn      /* copier la phrase */
+input[type="range"] /* sliders */</div>
+        <div class="demo-panels">
+          <div class="demo-panel demo-panel--before">
+            <div class="demo-panel-label">Avant — focus invisible</div>
+            <div class="demo-panel-content">
+              <div class="demo-focus-bad">
+                <button>Copier la phrase</button>
+                <div class="demo-focus-note">Cliquer → aucun anneau de focus. Navigateur masque l'outline par défaut.</div>
+              </div>
+            </div>
+          </div>
+          <div class="demo-panel demo-panel--after">
+            <div class="demo-panel-label">Après — focus jaune visible</div>
+            <div class="demo-panel-content">
+              <div class="demo-focus-good">
+                <button class="focused-demo" style="outline:3px solid #FFF200;outline-offset:3px;">Copier la phrase</button>
+                <div class="demo-focus-note">Tab → anneau jaune bien visible sur fond sombre.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-block"><span class="comment">/* Fix : ajouter en bas du bloc CSS */</span>
+<span class="hl-good">:focus-visible {
+  outline: 3px solid var(--jaune);
+  outline-offset: 3px;
+  border-radius: 4px;
+}</span>
+
+<span class="comment">/* Optionnel : neutraliser sur les sliders (custom thumb déjà visible) */</span>
+input[type="range"]:focus-visible { outline: none; }
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  <span class="hl-good">box-shadow: 0 0 0 3px var(--jaune);</span>
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION C — RÉCAPITULATIF
+  ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Section C — Priorisation</h2>
+    </div>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Finding</th>
+          <th>Source</th>
+          <th>Impact UX</th>
+          <th>Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>B5</td>
+          <td><strong>Focus :focus-visible absent</strong></td>
+          <td>Manuel</td>
+          <td><span class="impact-dot impact-dot--high"></span>Haut — violation WCAG</td>
+          <td><span class="effort-chip effort-chip--xs">XS — 5 lignes CSS</span></td>
+        </tr>
+        <tr>
+          <td>B1</td>
+          <td><strong>Texte résiduel sous 12 px</strong> (.copy-label, .step-badge)</td>
+          <td>Manuel</td>
+          <td><span class="impact-dot impact-dot--medium"></span>Moyen — lisibilité</td>
+          <td><span class="effort-chip effort-chip--xs">XS — 2 lignes CSS</span></td>
+        </tr>
+        <tr>
+          <td>A1</td>
+          <td><strong>Side-tab accent border</strong> (.copy-quote)</td>
+          <td>impeccable</td>
+          <td><span class="impact-dot impact-dot--medium"></span>Moyen — cliché visuel</td>
+          <td><span class="effort-chip effort-chip--xs">XS — 2 propriétés CSS</span></td>
+        </tr>
+        <tr>
+          <td>B4</td>
+          <td><strong>--vert-pale trop transparent</strong> (6%)</td>
+          <td>Manuel</td>
+          <td><span class="impact-dot impact-dot--medium"></span>Moyen — affordance zone</td>
+          <td><span class="effort-chip effort-chip--xs">XS — 1 variable + 1 règle</span></td>
+        </tr>
+        <tr>
+          <td>A2</td>
+          <td><strong>Wide letter-spacing</strong> sur .section-tag</td>
+          <td>impeccable</td>
+          <td><span class="impact-dot impact-dot--low"></span>Faible — vitesse lecture</td>
+          <td><span class="effort-chip effort-chip--xs">XS — 1 propriété CSS</span></td>
+        </tr>
+        <tr>
+          <td>B2</td>
+          <td><strong>Noms de classes --rouge rendant vert</strong></td>
+          <td>Manuel</td>
+          <td><span class="impact-dot impact-dot--low"></span>Faible — dette maintenance</td>
+          <td><span class="effort-chip effort-chip--s">S — CSS + HTML + JS</span></td>
+        </tr>
+        <tr>
+          <td>B3</td>
+          <td><strong>Variables orphelines --rouge-*</strong></td>
+          <td>Manuel</td>
+          <td><span class="impact-dot impact-dot--low"></span>Faible — hygiène CSS</td>
+          <td><span class="effort-chip effort-chip--xs">XS — supprimer 3 lignes</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
