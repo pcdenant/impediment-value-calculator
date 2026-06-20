@@ -13,7 +13,7 @@
   :root {
     --vert: #006946;
     --vert-profond: #004D34;
-    --vert-pale: rgba(0,105,70,0.06);
+    --vert-pale: rgba(0,105,70,0.10);
     --vert-border: rgba(0,105,70,0.15);
     --jaune: #FFF200;
     --jaune-doux: #FFF8A1;
@@ -27,9 +27,6 @@
     --blanc: #FFFFFF;
     --text: #1A1A1A;
     --text-muted: #6B5F53;
-    --rouge: #C0392B;
-    --rouge-pale: rgba(192,57,43,0.05);
-    --rouge-border: rgba(192,57,43,0.12);
     --radius: 16px;
     --gap: 8px;
   }
@@ -50,7 +47,14 @@
     border-radius: var(--radius);
     border: 1px solid var(--creme-fonce);
     overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
   }
+  .tile:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+  }
+  .tile--result:hover,
+  .tile--evite:hover { transform: none; box-shadow: none; }
   .tile-pad { padding: 20px 22px; }
 
   .tile--result {
@@ -114,19 +118,20 @@
     color: var(--blanc);
     background: var(--vert);
   }
+  .devise-btn:not([aria-pressed="true"]):hover { background: var(--creme); color: var(--text); }
+  .devise-btn:active { transform: scale(0.97); }
 
   /* Section labels */
   .section-tag {
     display: inline-block;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
     padding: 4px 10px;
     border-radius: 6px;
     margin-bottom: 16px;
   }
-  .section-tag--factuel { background: var(--vert-pale); color: var(--vert); }
-  .section-tag--estimation { background: var(--vert-pale); color: var(--vert); }
+  .section-tag--factuel { background: var(--vert-pale); color: var(--vert); border: 1px solid var(--vert-border); }
+  .section-tag--estimation { background: var(--vert-pale); color: var(--vert); border: 1px solid var(--vert-border); }
 
   .step-row {
     display: flex;
@@ -141,7 +146,7 @@
     border-radius: 50%;
     background: var(--vert);
     color: var(--blanc);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -172,7 +177,6 @@
     white-space: nowrap;
   }
   .field-value--vert { color: var(--vert); }
-  .field-value--rouge { color: var(--vert); }
   .field-aide {
     margin: 6px 0 0;
     font-size: 0.75rem;
@@ -211,8 +215,6 @@
   }
   .range--vert::-webkit-slider-thumb { background: var(--vert); }
   .range--vert::-moz-range-thumb { background: var(--vert); }
-  .range--rouge::-webkit-slider-thumb { background: var(--vert); }
-  .range--rouge::-moz-range-thumb { background: var(--vert); }
 
   /* Unit pills */
   .pills { display: flex; gap: 5px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -227,10 +229,6 @@
     transition: all 0.15s;
   }
   .pill--vert[aria-pressed="true"] {
-    font-weight: 700; color: var(--blanc);
-    background: var(--vert); border-color: var(--vert);
-  }
-  .pill--rouge[aria-pressed="true"] {
     font-weight: 700; color: var(--blanc);
     background: var(--vert); border-color: var(--vert);
   }
@@ -258,7 +256,7 @@
 
   /* Copy */
   .copy-label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -266,9 +264,9 @@
     margin-bottom: 8px;
   }
   .copy-quote {
-    border-left: 3px solid var(--vert);
+    border: 1px solid rgba(0,105,70,0.25);
     background: var(--vert-pale);
-    border-radius: 0 8px 8px 0;
+    border-radius: 8px;
     padding: 10px 12px;
     margin-bottom: 16px;
   }
@@ -312,6 +310,35 @@
     color: var(--text-muted);
   }
   .bento-footer a { color: var(--vert); text-decoration: none; font-weight: 600; }
+
+  /* Pill + button active feedback */
+  .pill:active        { transform: scale(0.95); }
+  .copy-btn:active    { transform: scale(0.97); }
+
+  /* Slider thumb active */
+  input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(0,105,70,0.15), 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Focus visible — WCAG 2.4.7 */
+  :focus-visible {
+    outline: 3px solid var(--jaune);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  input[type="range"]:focus-visible { outline: none; }
+  input[type="range"]:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px var(--jaune), 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Result number flash on update */
+  @keyframes resultFlash {
+    0%   { opacity: 1; transform: scale(1); }
+    30%  { opacity: 0.75; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .res-number--flash { animation: resultFlash 0.35s ease-out; }
 
   /* Fade-in */
   @keyframes tileIn {
@@ -391,9 +418,9 @@
     <div class="field">
       <div class="field-header">
         <span class="field-label">Temps de blocage évité</span>
-        <span class="field-value field-value--rouge" id="v-evite"></span>
+        <span class="field-value field-value--vert" id="v-evite"></span>
       </div>
-      <input type="range" class="range--rouge" id="r-evite" min="1" max="7" step="1" value="2" oninput="update()">
+      <input type="range" class="range--vert" id="r-evite" min="1" max="7" step="1" value="2" oninput="update()">
       <p class="field-aide" id="aide-evite"></p>
     </div>
   </div>
@@ -497,7 +524,7 @@
   };
   window.setUniteEvite = function(id) {
     uniteEvite = id; configSlider('r-evite', id);
-    buildPills('pills-evite', uniteEvite, 'pill--rouge', setUniteEvite); update();
+    buildPills('pills-evite', uniteEvite, 'pill--vert', setUniteEvite); update();
   };
 
   window.setDevise = function(d) {
@@ -541,14 +568,22 @@
     // Result 1
     document.getElementById('chain-blocage').textContent =
       pers + ' pers. \u00D7 ' + fmtDuree(dureeH) + ' \u00D7 ' + cout + ' ' + s + '/h';
-    document.getElementById('primary-blocage').textContent = fmt(coutBlocage) + ' ' + s;
+    var elBlocage = document.getElementById('primary-blocage');
+    elBlocage.textContent = fmt(coutBlocage) + ' ' + s;
+    elBlocage.classList.remove('res-number--flash');
+    void elBlocage.offsetWidth;
+    elBlocage.classList.add('res-number--flash');
     document.getElementById('secondary-blocage').textContent =
       fmtH(heures) + 'h de capacit\u00E9 immobilis\u00E9e';
 
     // Result 2
     document.getElementById('chain-evite').textContent =
       pers + ' pers. \u00D7 ' + fmtDuree(deltaH) + ' en plus \u00D7 ' + cout + ' ' + s + '/h';
-    document.getElementById('primary-evite').textContent = fmt(coutEvite) + ' ' + s;
+    var elEvite = document.getElementById('primary-evite');
+    elEvite.textContent = fmt(coutEvite) + ' ' + s;
+    elEvite.classList.remove('res-number--flash');
+    void elEvite.offsetWidth;
+    elEvite.classList.add('res-number--flash');
     document.getElementById('secondary-evite').textContent =
       fmtDuree(deltaH) + ' de blocage suppl\u00E9mentaire \u00E9vit\u00E9es';
 
@@ -595,7 +630,7 @@
   }
 
   buildPills('pills-duree', uniteDuree, 'pill--vert', setUniteDuree);
-  buildPills('pills-evite', uniteEvite, 'pill--rouge', setUniteEvite);
+  buildPills('pills-evite', uniteEvite, 'pill--vert', setUniteEvite);
   update();
 })();
 </script>
