@@ -29,7 +29,7 @@ No abstraction for one caller, no unasked config, no future-proofing (add it the
 ## Project
 
 - **Stack / runtime:** HTML + CSS + vanilla JS (ES5), zéro dépendance runtime, zéro build. Fichier unique : `index.html`. Google Fonts chargé via CDN (DM Sans, DM Serif Display).
-- **Run / test / lint:** Ouvrir `index.html` directement dans un navigateur — pas de serveur, pas de CLI, pas de tests automatisés, pas de linter configuré. Vérification manuelle dans le navigateur.
+- **Run / test / lint:** Ouvrir `index.html` directement dans un navigateur — pas de serveur, pas de build, pas de linter configuré. Tests : `node --test` (Node ≥ 18, zéro dépendance) — `tests/calc.test.js` exécute le `<script>` de `index.html` dans un `vm` avec un faux DOM minimal et couvre formules, unités, `fmtDuree`, devises, messages, pluriels et copie. Tout changement de formule ou de texte affiché doit garder ces tests verts (ou les mettre à jour sciemment).
 - **Non-obvious conventions:**
   - Tout le JS est dans un IIFE `(function(){ 'use strict'; ... })()` en bas du fichier — style ES5 délibéré, pas de `const`/`let`/arrow functions.
   - L'UI est en français. Les chaînes affichées utilisent `\uXXXX` pour les caractères spéciaux (ex: `€` = €, `×` = ×). Ne pas introduire de fichier de traduction.

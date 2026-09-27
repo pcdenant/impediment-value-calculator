@@ -420,7 +420,7 @@
         <span class="field-label">Temps de blocage évité</span>
         <span class="field-value field-value--vert" id="v-evite"></span>
       </div>
-      <input type="range" class="range--vert" id="r-evite" min="1" max="7" step="1" value="2" oninput="update()">
+      <input type="range" class="range--vert" id="r-evite" min="0.5" max="7" step="0.5" value="2" oninput="update()">
       <p class="field-aide" id="aide-evite"></p>
     </div>
   </div>
@@ -585,11 +585,11 @@
     void elEvite.offsetWidth;
     elEvite.classList.add('res-number--flash');
     document.getElementById('secondary-evite').textContent =
-      fmtDuree(deltaH) + ' de blocage suppl\u00E9mentaire \u00E9vit\u00E9es';
+      fmtDuree(deltaH) + ' de blocage suppl\u00E9mentaire \u00E9vit\u00E9';
 
     // Aide
     document.getElementById('aide-evite').textContent =
-      'Sans toi, ' + pers + ' personne' + (pers > 1 ? 's' : '') + ' auraient attendu ' + fmtDuree(deltaH) + ' de plus.';
+      'Sans toi, ' + pers + ' personne' + (pers > 1 ? 's auraient' : ' aurait') + ' attendu ' + fmtDuree(deltaH) + ' de plus.';
 
     // Phrases
     var pl = pers > 1;
