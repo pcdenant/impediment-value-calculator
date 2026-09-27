@@ -28,14 +28,15 @@ No abstraction for one caller, no unasked config, no future-proofing (add it the
 
 ## Project
 
-- **Stack / runtime:** HTML + CSS + vanilla JS (ES5), zéro dépendance runtime, zéro build. Fichier unique : `index.html`. Google Fonts chargé via CDN (DM Sans, DM Serif Display).
+- **Stack / runtime:** HTML + CSS + vanilla JS (ES5), zéro dépendance runtime, zéro build. Fichier unique : `index.html`. Google Fonts chargé via CDN (Archivo, IBM Plex Sans, IBM Plex Mono).
+- **Design system :** celui du SM Survival Score (encre `#15110d` / papier `#f9f3e4` / signal `#c8102e`), tokens dans `:root`. Source de vérité : objet `T` de `sm-survival-score/src/sm-survival-score.jsx`. Couleurs à portée de surface : `--signal` en texte sur papier seulement ; sur encre → `--signal-clair`. Cibles cliquables ≥ 48px, focus = contour papier + anneau signal.
 - **Run / test / lint:** Ouvrir `index.html` directement dans un navigateur — pas de serveur, pas de build, pas de linter configuré. Tests : `node --test` (Node ≥ 18, zéro dépendance) — `tests/calc.test.js` exécute le `<script>` de `index.html` dans un `vm` avec un faux DOM minimal et couvre formules, unités, `fmtDuree`, devises, messages, pluriels et copie. Tout changement de formule ou de texte affiché doit garder ces tests verts (ou les mettre à jour sciemment).
 - **Non-obvious conventions:**
   - Tout le JS est dans un IIFE `(function(){ 'use strict'; ... })()` en bas du fichier — style ES5 délibéré, pas de `const`/`let`/arrow functions.
   - L'UI est en français. Les chaînes affichées utilisent `\uXXXX` pour les caractères spéciaux (ex: `€` = €, `×` = ×). Ne pas introduire de fichier de traduction.
   - Le calcul clé : `coût blocage = personnes × durée_en_heures × coût_horaire` ; `coût évité = personnes × delta_heures × coût_horaire`. Ces formules sont l'essence du produit — ne pas les modifier sans confirmation.
   - `fmtDuree(heures)` formate une durée en heures vers une chaîne lisible (min / h / jours / sem. / mois). Logique de seuil fragile : 1h=8h pour 1 jour, 40h=1 semaine, 160h=1 mois.
-  - `track(el, color)` repeint le fond du `<input type="range">` pour simuler un track coloré côté gauche du curseur — technique CSS en ligne, pas de pseudo-éléments.
+  - `track(el, color)` repeint le `background-image` du `<input type="range">` pour simuler un track coloré côté gauche du curseur — technique CSS en ligne, pas de pseudo-éléments. L'input fait 48px de haut (cible tactile) ; la piste de 5px est centrée par `background-size`/`background-position` en CSS — ne pas repasser à `style.background` (le raccourci écraserait la taille).
   - Deux devises supportées : `eur` (65 €/h défaut, ×1.4÷1600) et `cad` (55 $/h défaut, ×1.3÷1800). Ajouter une devise = ajouter une entrée dans `DEVISES` et un bouton dans le HTML.
 - **Do-not-touch files / dirs:** `LICENSE` — licence MIT, ne pas modifier.
 - **The one gotcha that bites everyone:** Il n'y a pas de `package.json`, pas de `node_modules`, pas de framework. Si tu crées un fichier JS/CSS séparé, l'app se casse car `index.html` est servi directement (GitHub Pages ou simple ouverture locale). Toute nouvelle logique va dans `index.html`.
