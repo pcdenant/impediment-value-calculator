@@ -470,9 +470,9 @@
   var phraseLongue = '', phraseCourte = '';
 
   function fmt(n) { return Math.round(n).toLocaleString('fr-FR'); }
+  // 2 décimales max : toFixed(1) arrondissait 0.35 en 0,3 (flottant) et perdait la précision sous l'heure
   function fmtH(h) {
-    if (h % 1 === 0) return h.toString();
-    return h.toFixed(1).replace('.', ',');
+    return (Math.round(h * 100) / 100).toString().replace('.', ',');
   }
   function fmtDuree(heures) {
     if (heures < 1) return Math.round(heures * 60) + ' min';
