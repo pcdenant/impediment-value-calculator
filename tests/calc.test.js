@@ -319,3 +319,10 @@ test('sans navigator.clipboard : fallback execCommand', function() {
   assert.equal(app.text('btn-long'), 'Copié ✓');
   assert.equal(app.ctx.document.body.children.length, 0, 'textarea temporaire retiré');
 });
+
+test('capacité immobilisée sous l\'heure : 3 pers × 7 min = 0,35h (pas 0,3h)', function() {
+  var app = load();
+  app.pill('pills-duree', 'min');
+  app.set('r-duree', 7);
+  assert.equal(app.text('secondary-blocage'), '0,35h de capacité immobilisée');
+});
